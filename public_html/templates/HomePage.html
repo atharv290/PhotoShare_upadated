@@ -1,439 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GalleryLoop - A platform for photographers.">
-    <meta name="author" content="Devcrud">
-    <title>𝑮𝒂𝒍𝒍𝒆𝒓𝒚𝑳𝒐𝒐𝒑</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/themify-icons/css/themify-icons.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/meyawo.css') }}">
-    <style>
-        /* Global Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GalleryLoop</title>
 
-        /* Navbar */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        .navbar .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #5a67d8;
-        }
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f8f9fa;
+      color: #212529;
+    }
 
-        .navbar .nav-links {
-            display: flex;
-            gap: 20px;
-        }
+    /* Navbar */
+    .navbar {
+      background: #fff;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, #00b3ff, #00ffe7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .navbar .nav-links a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
-        }
+    /* Feed */
+    .feed {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem 1rem;
+    }
+    .post {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: .75rem;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .post:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .post img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .caption {
+      padding: 1rem;
+    }
+    .caption strong {
+      display: block;
+      font-size: 1rem;
+      color: #0d6efd;
+    }
+    .caption p {
+      font-size: .9rem;
+      color: #495057;
+      margin: .5rem 0 1rem;
+    }
 
-        .navbar .nav-links a:hover {
-            background-color: #5a67d8;
-            color: #fff;
-        }
+    /* Like Button */
+    .like-button {
+      border-radius: 20px;
+      font-size: .85rem;
+    }
 
-        /* Main Content */
-        .main-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    /* Sidebar */
+    .sidebar {
+      padding: 1.5rem;
+    }
+    .widget {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: .75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .widget h5 {
+      font-size: 1rem;
+      margin-bottom: .75rem;
+      font-weight: 600;
+    }
 
-        .feed {
-            flex: 2;
-            min-width: 300px;
-        }
-
-        .sidebar {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        /* Post Styles */
-        .post {
-            background: #fff;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .post img {
-            width: 100%;
-            height: auto;
-            border-bottom: 1px solid #eee;
-        }
-
-        .post .caption {
-            padding: 15px;
-        }
-
-        .post .caption strong {
-            font-size: 16px;
-            color: #5a67d8;
-        }
-
-        .post .caption p {
-            margin: 10px 0;
-            color: #555;
-        }
-
-        .post .like-button {
-            background-color: #5a67d8;
-            color: #fff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .post .like-button:hover {
-            background-color: #434aa8;
-        }
-
-        /* Sidebar Widgets */
-        .widget {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .widget h3 {
-            margin: 0 0 15px;
-            font-size: 18px;
-            color: #5a67d8;
-        }
-
-        .widget p {
-            margin: 5px 0;
-            color: #555;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: #fff;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        .footer p {
-            margin: 0;
-            color: #777;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 1001;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .modal h2 {
-            margin: 0 0 20px;
-            font-size: 24px;
-            color: #5a67d8;
-        }
-
-        .modal input,
-        .modal select,
-        .modal textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .modal button {
-            background-color: #5a67d8;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .modal button:hover {
-            background-color: #434aa8;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-
-            .feed,
-            .sidebar {
-                width: 100%;
-            }
-
-            .navbar .nav-links {
-                gap: 10px;
-            }
-
-            .navbar .nav-links a {
-                padding: 6px 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .navbar .nav-links {
-                margin-top: 10px;
-            }
-
-            .modal {
-                width: 95%;
-            }
-        }
-    </style>
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: .9rem;
+      color: #6c757d;
+      border-top: 1px solid #e9ecef;
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo">𝑮𝒂𝒍𝒍𝒆𝒓𝒚𝑳𝒐𝒐𝒑</div>
-        <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#" onclick="openGallery()">Gallery</a>
-            <a href="#" onclick="openModel()">Hire Photographer</a>
-            <a href="/logout">Logout</a>
-        </div>
-    </nav>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">GalleryLoop</a>
+      <div class="ms-auto d-flex gap-3">
+        <a href="#" class="nav-link" onclick="openGallery()">Gallery</a>
+        <a href="#" class="nav-link" onclick="openHire()">Hire Photographer</a>
+        <a href="/logout" class="btn btn-sm btn-outline-primary">Logout</a>
+      </div>
+    </div>
+  </nav>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Feed -->
-        <div class="feed">
-            <!-- Posts will be dynamically inserted here -->
-        </div>
+  <!-- Main Content -->
+  <div class="container-fluid mt-4">
+    <div class="row">
+      <!-- Feed -->
+      <div class="col-lg-8">
+        <div class="feed"></div>
+      </div>
 
-        <!-- Sidebar -->
+      <!-- Sidebar -->
+      <div class="col-lg-4">
         <div class="sidebar">
-            <div class="widget" id="privateCodesWidget">
-                <h3>Private Gallery Codes</h3>
-                <div id="code-list">
-                    <p>Loading...</p>
-                </div>
-            </div>            
-            <div class="widget">
-                <h3>Trending Hashtags</h3>
-                <p>#Photography</p>
-                <p>#Nature</p>
-                <p>#Travel</p>
-            </div>
+          <div class="widget" id="privateCodesWidget">
+            <h5>🔒 Private Gallery Codes</h5>
+            <div id="code-list"><p>Loading...</p></div>
+          </div>
+          <div class="widget">
+            <h5>🔥 Trending Hashtags</h5>
+            <span class="badge bg-primary me-1">#Photography</span>
+            <span class="badge bg-secondary me-1">#Nature</span>
+            <span class="badge bg-success me-1">#CityLights</span>
+            <span class="badge bg-warning text-dark me-1">#AIArt</span>
+            <span class="badge bg-danger">#Events</span>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <p>&copy; <script>document.write(new Date().getFullYear())</script> 𝑮𝒂𝒍𝒍𝒆𝒓𝒚𝑳𝒐𝒐𝒑. All rights reserved.</p>
-    </div>
+  <!-- Footer -->
+  <footer>
+    &copy; <script>document.write(new Date().getFullYear());</script> GalleryLoop. All rights reserved.
+  </footer>
 
-    <!-- Hire Photographer Modal -->
-    <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
-    <div class="modal" id="HireNow" style="display:none;">
-        <h2>Hire a Photographer</h2>
+  <!-- Hire Photographer Modal -->
+  <div class="modal fade" id="hireModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4">
+        <h5>Hire a Photographer</h5>
         <form action="/save-details" method="POST">
-            <input type="text" id="name" name="name" placeholder="Your Name" required>
-            <input type="text" id="event_type" name="event_type" placeholder="Event Type" required>
-            <input type="number" id="duration" name="duration" placeholder="Duration (hrs)" required>
-            <input type="number" id="num_photographers" name="num_photographers" placeholder="Number of Photographers" required>
-            <input type="text" id="location" name="location" placeholder="Event Location" required>
-            <select id="editing_level" name="editing_level" required>
-                <option value="" disabled selected>Select Editing Level</option>
-                <option value="Basic">Basic</option>
-                <option value="Standard">Standard</option>
-                <option value="Advanced">Advanced</option>
-            </select>
-            <input type="text" id="additional_services" name="additional_services" placeholder="Additional Services (e.g., Drone, Live Streaming)">
-            <textarea id="additional_details" name="additional_details" placeholder="Additional Details" rows="5"></textarea>
-            <button type="submit">Hire Now</button>
+          <input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
+          <input type="text" name="event_type" class="form-control mb-2" placeholder="Event Type" required>
+          <input type="number" name="duration" class="form-control mb-2" placeholder="Duration (hrs)" required>
+          <input type="number" name="num_photographers" class="form-control mb-2" placeholder="No. of Photographers" required>
+          <input type="text" name="location" class="form-control mb-2" placeholder="Event Location" required>
+          <select name="editing_level" class="form-select mb-2" required>
+            <option value="" disabled selected>Select Editing Level</option>
+            <option value="Basic">Basic</option>
+            <option value="Standard">Standard</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+          <input type="text" name="additional_services" class="form-control mb-2" placeholder="Additional Services (e.g., Drone)">
+          <textarea name="additional_details" class="form-control mb-3" placeholder="Additional Details" rows="3"></textarea>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Hire Now</button>
+          </div>
         </form>
+      </div>
     </div>
+  </div>
 
-    <!-- Gallery Modal -->
-    <div class="modal-overlay" id="gallery-overlay" onclick="closeGallery()"></div>
-    <div class="modal" id="galleryModal" style="display:none;">
-        <h2>Marketplace Access</h2>
+  <!-- Gallery Modal -->
+  <div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4">
+        <h5>Marketplace Access</h5>
         <form id="marketplaceForm" action="/marketplace" method="POST">
-            <p>Please select your access type:</p>
-            <select class="form-control" name="accessType" id="accessType" onchange="toggleSecretCode()">
-                <option value="public">Public</option>
-                <option value="private">Private</option>
-            </select>
-            <div class="form-group" id="secretCodeField" style="display: none;">
-                <label for="secretCode">Enter Secret Code:</label>
-                <input type="password" class="form-control" name="secretCode" id="secretCode" placeholder="Enter your secret code">
-            </div>
-            <button type="button" class="btn btn-secondary" onclick="closeGallery()">Cancel</button>
+          <label class="form-label">Access Type</label>
+          <select class="form-select mb-2" name="accessType" id="accessType" onchange="toggleSecretCode()">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+          <div id="secretCodeField" style="display:none;">
+            <input type="password" class="form-control mb-3" name="secretCode" placeholder="Enter your secret code">
+          </div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-primary">Continue</button>
+          </div>
         </form>
+      </div>
     </div>
+  </div>
 
-    <script>
-        function toggleSecretCode() {
-            const accessType = document.getElementById('accessType').value;
-            const secretCodeField = document.getElementById('secretCodeField');
-            secretCodeField.style.display = accessType === 'private' ? 'block' : 'none';
-        }
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleSecretCode() {
+      const status = document.getElementById("accessType").value;
+      document.getElementById("secretCodeField").style.display = status === "private" ? "block" : "none";
+    }
 
-        function openModel() {
-            document.getElementById("HireNow").style.display = "block";
-            document.getElementById("modal-overlay").style.display = "block";
-        }
+    function openHire() {
+      new bootstrap.Modal(document.getElementById("hireModal")).show();
+    }
 
-        function closeModal() {
-            document.getElementById("HireNow").style.display = "none";
-            document.getElementById("modal-overlay").style.display = "none";
-        }
+    function openGallery() {
+      new bootstrap.Modal(document.getElementById("galleryModal")).show();
+    }
 
-        function openGallery() {
-            document.getElementById("galleryModal").style.display = "block";
-            document.getElementById("gallery-overlay").style.display = "block";
-        }
+    async function fetchPosts() {
+      try {
+        const res = await fetch("/get-posts");
+        const posts = await res.json();
+        const feed = document.querySelector(".feed");
+        feed.innerHTML = "";
 
-        function closeGallery() {
-            document.getElementById("galleryModal").style.display = "none";
-            document.getElementById("gallery-overlay").style.display = "none";
-        }
+        posts.forEach(post => {
+          const card = document.createElement("div");
+          card.className = "post";
+          card.innerHTML = `
+            <img src="${post.image_url}" alt="Post">
+            <div class="caption">
+              <strong>${post.Email}</strong>
+              <p>${post.caption}</p>
+              <button class="btn btn-sm btn-outline-primary like-button">
+                Like (<span class="like-count">${post.Like_count}</span>)
+              </button>
+            </div>
+          `;
 
-        async function fetchPosts() {
-            try {
-                const response = await fetch('/get-posts');
-                const posts = await response.json();
-                const feed = document.querySelector('.feed');
-                feed.innerHTML = '';
-
-                posts.forEach(post => {
-                    const postDiv = document.createElement('div');
-                    postDiv.className = 'post';
-                    postDiv.setAttribute('data-post-id', post.Email);
-                    postDiv.setAttribute('data-user', post.filename);
-
-                    postDiv.innerHTML = `
-                        <img src="${post.image_url}" alt="Post Image">
-                        <div class="caption">
-                            <strong>${post.Email}</strong>
-                            <p>${post.caption}</p>
-                            <button class="like-button">
-                                Like (<span class="like-count">${post.Like_count}</span>)
-                            </button>
-                        </div>
-                    `;
-
-                    const likeButton = postDiv.querySelector('.like-button');
-                    const likeCountSpan = postDiv.querySelector('.like-count');
-
-                    likeButton.addEventListener('click', function () {
-                        const postId = postDiv.getAttribute('data-post-id');
-                        const postname = postDiv.getAttribute('data-user');
-
-                        fetch('/like', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ post_id: postId, filename: postname })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.like_count !== undefined) {
-                                likeCountSpan.textContent = data.like_count;
-                                likeButton.textContent = data.liked ? `Unlike (${data.like_count})` : `Like (${data.like_count})`;
-                            } else if (data.error) {
-                                console.error('Error:', data.error);
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                    });
-
-                    feed.appendChild(postDiv);
-                });
-            } catch (error) {
-                console.error('Error fetching posts:', error);
-            }
-        }
-
-        async function fetchPrivateCodes() {
-            try {
-                const response = await fetch('/get_private_codes');
-                const data = await response.json();
-                const container = document.getElementById('code-list');
-        
-                if (data.codes && data.codes.length > 0) {
-                    container.innerHTML = '';
-                    data.codes.forEach(code => {
-                        const p = document.createElement('p');
-                        p.textContent = code;
-                        container.appendChild(p);
-                    });
-                } else {
-                    container.innerHTML = '<p>No private codes available.</p>';
+          const likeBtn = card.querySelector(".like-button");
+          const likeCount = card.querySelector(".like-count");
+          likeBtn.addEventListener("click", () => {
+            fetch("/like", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ post_id: post.Email, filename: post.filename }),
+            })
+              .then(r => r.json())
+              .then(data => {
+                if (data.like_count !== undefined) {
+                  likeCount.textContent = data.like_count;
+                  likeBtn.textContent = data.liked
+                    ? `Unlike (${data.like_count})`
+                    : `Like (${data.like_count})`;
                 }
-            } catch (error) {
-                document.getElementById('code-list').innerHTML = '<p>Error loading codes</p>';
-                console.error('Error fetching codes:', error);
-            }
-        }
-        
-        window.onload = () => {
-            fetchPosts();
-            fetchPrivateCodes();
-        };
-    </script>
+              });
+          });
+
+          feed.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      }
+    }
+
+    async function fetchPrivateCodes() {
+      try {
+        const res = await fetch("/get_private_codes");
+        const data = await res.json();
+        const container = document.getElementById("code-list");
+        container.innerHTML = data.codes?.length
+          ? data.codes.map(c => `<p>${c}</p>`).join("")
+          : "<p>No private codes available.</p>";
+      } catch {
+        document.getElementById("code-list").innerHTML = "<p>Error loading codes</p>";
+      }
+    }
+
+    window.onload = () => {
+      fetchPosts();
+      fetchPrivateCodes();
+    };
+  </script>
 </body>
 </html>

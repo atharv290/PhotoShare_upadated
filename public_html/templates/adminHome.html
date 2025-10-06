@@ -1,496 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Include Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link href="/static/css/adminHome.css" rel="stylesheet" />
-    <title>Photographers Dashboard</title>
-    <style>
-      /* Global Styles */
-      body {
-        font-family: "Arial", sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #fafafa;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photographers Dashboard</title>
 
-      .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        background-color: #fff;
-        border-bottom: 1px solid #dbdbdb;
-      }
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-      .logo {
-        font-size: 24px;
-        font-weight: bold;
-        color: #262626;
-      }
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f8f9fa;
+    }
 
-      .nav-links {
-        display: flex;
-        gap: 20px;
-      }
+    /* Navbar */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .navbar-brand {
+      font-weight: 600;
+      color: #343a40 !important;
+    }
 
-      .nav-links i {
-        font-size: 20px;
-        color: #262626;
-        cursor: pointer;
-      }
+    /* Profile */
+    .profile-header {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .profile-pic {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+    .profile-info h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    .profile-info p {
+      font-size: 0.95rem;
+      color: #6c757d;
+    }
+    .profile-buttons .btn {
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
 
-      .container {
-        padding: 20px;
-      }
+    /* Marketplace Grid */
+    .marketplace {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: .5rem;
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .image-card img:hover {
+      transform: scale(1.03);
+    }
 
-      .profile-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        margin-bottom: 20px;
-      }
-
-      .profile-pic {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 10px;
-      }
-
-      .profile-info h1 {
-        font-size: 24px;
-        margin: 0;
-      }
-
-      .profile-info p {
-        font-size: 14px;
-        color: #8e8e8e;
-      }
-
-      .profile-buttons {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-      }
-
-      /* Professional Button Styles */
-      .profile-buttons button,
-      .profile-buttons a {
-        padding: 10px 20px;
-        font-size: 14px;
-        border: none;
-        border-radius: 25px; /* Rounded corners */
-        cursor: pointer;
-        background: linear-gradient(
-          45deg,
-          #5a67d8,
-          #434aa8
-        ); /* Gradient background */
-        color: white;
-        text-decoration: none;
-        text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-      }
-
-      .profile-buttons button:hover,
-      .profile-buttons a:hover {
-        background: linear-gradient(
-          45deg,
-          #434aa8,
-          #5a67d8
-        ); /* Gradient hover effect */
-        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
-        transform: translateY(-2px); /* Slight lift effect */
-      }
-
-      .profile-buttons button:active,
-      .profile-buttons a:active {
-        transform: translateY(0); /* Reset lift effect on click */
-      }
-
-      .marketplace {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 10px;
-        padding: 10px;
-      }
-
-      .image-card {
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        overflow: hidden;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .image-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        cursor: pointer;
-      }
-
-      /* Modal Styles */
-      .modal-img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 10px;
-      }
-
-      .modal-content {
-        border-radius: 10px;
-        background-color: #fff; /* Ensure modal background is white */
-      }
-
-      .modal-header {
-        border-bottom: 1px solid #e9ecef;
-      }
-
-      .modal-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-      }
-
-      .modal-body {
-        padding: 20px;
-        text-align: center;
-      }
-
-      /* Ensure modal backdrop is not dull */
-      .modal-backdrop {
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
-      }
-
-      /* Ensure modal is on top of other elements */
-      .modal {
-        z-index: 1050; /* Higher than default */
-      }
-
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .profile-header {
-          flex-direction: column;
-        }
-
-        .profile-buttons {
-          flex-direction: column;
-          width: 100%;
-        }
-
-        .profile-buttons button,
-        .profile-buttons a {
-          width: 100%;
-        }
-
-        .marketplace {
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        }
-      }
-
-      @media (max-width: 480px) {
-        .profile-info h1 {
-          font-size: 20px;
-        }
-
-        .profile-info p {
-          font-size: 12px;
-        }
-
-        .profile-buttons button,
-        .profile-buttons a {
-          font-size: 12px;
-        }
-
-        .marketplace {
-          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="navbar">
-      <div class="logo">GalleryLoop</div>
-      <div class="nav-links">
-        <i class="fa fa-home"></i>
-        <i class="fa fa-search"></i>
-        <i class="fa fa-plus-circle"></i>
-        <i class="fa fa-user"></i>
-        <button onclick="Check_notify">Check Notifications</button>
+    /* Modal images */
+    .modal-img {
+      max-width: 100%;
+      border-radius: .5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">GalleryLoop</a>
+      <div class="ms-auto d-flex gap-3">
+        <button class="btn btn-sm btn-outline-secondary">Notifications</button>
+        <a href="/logout" class="btn btn-sm btn-primary">Logout</a>
       </div>
     </div>
-    <div class="container">
-      <div class="profile-header">
-        <div class="profile-header-inner">
-          <img
-            src="{{ url_for('static', filename=profile.profile_img.split('static/')[-1]) }}"
-            alt="Profile"
-            class="profile-pic"
-          />
-          <div class="profile-info">
-            <h1>{{ profile.name }}</h1>
-            <p>{{ profile.bio }}</p>
-          </div>
-        </div>
-        <!-- Buttons in one line -->
-        <div class="profile-buttons">
-          <button class="update-btn" id="update_btn" onclick="openModal()">
-            Edit Profile
-          </button>
-          <button class="post-btn" id="post_btn" onclick="Post()">Post</button>
-          <button class="post-btn" id="post_btn" onclick="uploadmodel()">
-            Upload
-          </button>
-          <button class="post-btn" onclick="showPastEvents()">Past Events</button>
-          <a href="/logout" class="btn btn-primary">Logout</a>
-        </div>
+  </nav>
+
+  <!-- Profile -->
+  <div class="container">
+    <div class="profile-header">
+      <img src="{{ url_for('static', filename=profile.profile_img.split('static/')[-1]) }}" alt="Profile" class="profile-pic">
+      <div class="profile-info">
+        <h1>{{ profile.name }}</h1>
+        <p>{{ profile.bio }}</p>
+      </div>
+      <div class="profile-buttons mt-3 d-flex flex-wrap gap-2 justify-content-center">
+        <button class="btn btn-primary" onclick="openModal()">Edit Profile</button>
+        <button class="btn btn-outline-primary" onclick="Post()">Post</button>
+        <button class="btn btn-outline-primary" onclick="uploadmodel()">Upload</button>
+        <button class="btn btn-outline-secondary" onclick="showPastEvents()">Past Events</button>
       </div>
     </div>
+
+    <!-- Marketplace -->
     <div class="marketplace" id="marketplace"></div>
-    <!-- Modal for Image Preview -->
-    <div
-      class="modal fade"
-      id="imageModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="imageModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <img
-              src=""
-              alt="Expanded Image"
-              class="modal-img img-fluid"
-              id="modalImage"
-            />
-          </div>
-        </div>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content p-3">
+        <img src="" class="modal-img" id="modalImage" alt="Expanded Image">
       </div>
     </div>
-    <div class="modal-overlay" id="modal-overlay3" onclick="closeModal()"></div>
-    <div class="modal" id="upload">
-      <div class="upload-section">
-        <h2>Upload Photos</h2>
-        <form
-          id="uploadForm"
-          action="/upload_photos"
-          method="POST"
-          enctype="multipart/form-data"
-        >
-          <label for="location">Location of Photoshoot:</label>
-          <select id="status" name="status" onchange="togglePrivateFields()">
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-          <label for="cost">Price</label>
-          <input type="Number" id="cost" name="cost" />
-          <div id="privateFields" class="private-details">
-            <label for="clientEmail">Client's Email:</label>
-            <input type="email" id="clientEmail" name="clientEmail" />
+  </div>
 
-            <label for="clientName">Client's Name:</label>
-            <input type="text" id="clientName" name="clientName" />
-
-            <label for="clientMobile">Client's Mobile Number:</label>
-            <input type="tel" id="clientMobile" name="clientMobile" />
-          </div>
-
-          <label for="date">Photoshoot Date:</label>
-          <input type="date" id="date" name="date" />
-
-          <label for="photos">Select Photos:</label>
-          <div id="drop-zone">
-            Drag & drop photos here or click to select
-            <input type="file" id="photos" name="photos" multiple hidden />
-          </div>
-
-          <button type="submit">Upload Photos</button>
+  <!-- Edit Profile Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4">
+        <h5>Edit Profile</h5>
+        <form action="/update_profile" method="POST" enctype="multipart/form-data">
+          <input type="text" name="name" placeholder="Enter Name" class="form-control mb-2">
+          <input type="text" name="bio" placeholder="Enter Bio" class="form-control mb-2">
+          <input type="file" name="profile_pic" class="form-control mb-3">
+          <button type="submit" class="btn btn-primary w-100">Update</button>
         </form>
       </div>
     </div>
-    <!-- Modal for Edit Profile -->
-    <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
-    <div class="modal" id="editModal">
-      <button class="close-btn" onclick="closeModal()">×</button>
-      <h2>Edit Profile</h2>
-      <form
-        action="/update_profile"
-        method="POST"
-        enctype="multipart/form-data"
-      >
-        <input type="text" name="name" placeholder="Enter Name" />
-        <input type="text" name="bio" placeholder="Enter Bio" />
-        <input type="file" name="profile_pic" />
-        <!-- Single file input -->
-        <button type="submit">Update Profile</button>
-      </form>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4">
+        <h5>Upload Photos</h5>
+        <form id="uploadForm" action="/upload_photos" method="POST" enctype="multipart/form-data">
+          <label class="form-label">Visibility</label>
+          <select id="status" name="status" class="form-select mb-2" onchange="togglePrivateFields()">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+          <input type="number" name="cost" placeholder="Price" class="form-control mb-2">
+          <div id="privateFields" style="display:none;">
+            <input type="email" name="clientEmail" placeholder="Client Email" class="form-control mb-2">
+            <input type="text" name="clientName" placeholder="Client Name" class="form-control mb-2">
+            <input type="tel" name="clientMobile" placeholder="Client Mobile" class="form-control mb-2">
+          </div>
+          <input type="date" name="date" class="form-control mb-2">
+          <input type="file" name="photos" multiple class="form-control mb-3">
+          <button type="submit" class="btn btn-primary w-100">Upload</button>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <!-- Modal for Post -->
-    <div class="modal-overlay" id="modal-overlay2" onclick="closeModal()"></div>
-    <div class="modal" id="editPost">
-      <button class="close-btn" onclick="closeModal()">×</button>
-      <h2>Post</h2>
-      <form action="/post_img" method="POST" enctype="multipart/form-data">
-        <input type="text" name="caption" placeholder="Caption" />
-        <input type="file" name="Post_imgs" />
-        <!-- Single file input -->
-        <button type="submit">Post</button>
-      </form>
+  <!-- Past Events Modal -->
+  <div class="modal fade" id="pastEventsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4">
+        <h5>Past Events</h5>
+        <div id="eventList"></div>
+      </div>
     </div>
-    <div id="successMessage" style="display: none; color: green"></div>
-    <div id="errorMessage" style="display: none; color: red"></div>
-    <div class="modal-overlay" id="modal-overlay-past" onclick="closeModal()"></div>
-<div class="modal" id="pastEventsModal" style="display: none;">
-    <button class="close-btn" onclick="closeModal()">×</button>
-    <h2>Past Events</h2>
-    <div id="eventList"></div>
-</div>
+  </div>
 
-    <script>
-      // Handle drag-and-drop functionality
-      const dropZone = document.getElementById("drop-zone");
-      const fileInput = document.getElementById("photos");
-
-      dropZone.addEventListener("click", () => fileInput.click());
-      dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.classList.add("dragover");
-      });
-      dropZone.addEventListener("dragleave", () =>
-        dropZone.classList.remove("dragover")
-      );
-      dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.classList.remove("dragover");
-        fileInput.files = e.dataTransfer.files;
-      });
-
-      // Toggle private fields visibility based on selection
-      function togglePrivateFields() {
-        const location = document.getElementById("status").value;
-        const privateFields = document.getElementById("privateFields");
-
-        privateFields.style.display = location === "private" ? "block" : "none";
-      }
-      function openModal() {
-        document.getElementById("editModal").style.display = "block";
-        document.getElementById("modal-overlay").style.display = "block";
-      }
-
-      // Open Post Modal
-      function Post() {
-        document.getElementById("editPost").style.display = "block";
-        document.getElementById("modal-overlay2").style.display = "block";
-      }
-      function uploadmodel() {
-        document.getElementById("upload").style.display = "block";
-        document.getElementById("modal-overlay").style.display = "block";
-      }
-
-      // Close Modals
-      function closeModal() {
-        document.getElementById("editModal").style.display = "none";
-        document.getElementById("modal-overlay").style.display = "none";
-        document.getElementById("editPost").style.display = "none";
-        document.getElementById("modal-overlay2").style.display = "none";
-        document.getElementById("upload").style.display = "none";
-        document.getElementById("modal-overlay3").style.display = "none";
-        document.getElementById("pastEventsModal").style.display = "none";
-        document.getElementById("modal-overlay-past").style.display = "none";
-      }
-      // Function to expand an image in the modal
-      function expandImage(url) {
-        const modalImage = document.getElementById("modalImage");
-        modalImage.src = url; // Set the image source
-        $("#imageModal").modal("show"); // Show the modal using Bootstrap
-      }
-
-      // Fetch images and display them in the marketplace
-      async function fetchImages() {
-        try {
-          const response = await fetch("/get-images-photographer"); // Fetch images from the backend
-          const data = await response.json();
-
-          const marketplace = document.getElementById("marketplace");
-          marketplace.innerHTML = ""; // Clear existing content
-
-          data.images.forEach((image) => {
-            const card = document.createElement("div");
-            card.className = "image-card";
-            card.innerHTML = `
-          <img src="${image.url}" alt="${image.url}" onclick="expandImage('${image.url}')">
-        `;
-            marketplace.appendChild(card);
-          });
-        } catch (error) {
-          console.error("Error fetching images:", error);
-        }
-      }
-      function showPastEvents() {
-        document.getElementById("pastEventsModal").style.display = "block";
-        document.getElementById("modal-overlay-past").style.display = "block";
-    
-        fetch('/get-past-events')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                const eventList = document.getElementById('eventList');
-                eventList.innerHTML = "";
-    
-                if (data.clients && data.clients.length > 0) {
-                    data.clients.forEach(client => {
-                        eventList.innerHTML += `
-                            <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                                <strong>Name:</strong> ${client.client_name}<br>
-                                <strong>Email:</strong> ${client.client_email}<br>
-                                <strong>Mobile:</strong> ${client.client_no}<br>
-                                <strong>Date:</strong> ${client.date}<br>
-                            </div>
-                        `;
-                    });
-                } else {
-                    eventList.innerHTML = "<p>No past Event found.</p>";
-                }
-            })
-            .catch(err => {
-                document.getElementById('eventList').innerHTML = "<p>Error loading events.</p>";
-                console.error(err);
-            });
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Expand image in modal
+    function expandImage(url) {
+      document.getElementById("modalImage").src = url;
+      new bootstrap.Modal(document.getElementById("imageModal")).show();
     }
-       
 
-      // Fetch images on page load
-      fetchImages();
-    </script>
-    <!-- jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
-  </body>
+    // Toggle private fields
+    function togglePrivateFields() {
+      const status = document.getElementById("status").value;
+      document.getElementById("privateFields").style.display = (status === "private") ? "block" : "none";
+    }
+
+    // Open modals
+    function openModal() {
+      new bootstrap.Modal(document.getElementById("editModal")).show();
+    }
+    function Post() {
+      new bootstrap.Modal(document.getElementById("editPost")).show();
+    }
+    function uploadmodel() {
+      new bootstrap.Modal(document.getElementById("uploadModal")).show();
+    }
+    function showPastEvents() {
+      const modal = new bootstrap.Modal(document.getElementById("pastEventsModal"));
+      modal.show();
+
+      fetch('/get-past-events')
+        .then(res => res.json())
+        .then(data => {
+          const eventList = document.getElementById('eventList');
+          eventList.innerHTML = "";
+
+          if (data.clients?.length) {
+            data.clients.forEach(client => {
+              eventList.innerHTML += `
+                <div class="border rounded p-2 mb-2">
+                  <strong>Name:</strong> ${client.client_name}<br>
+                  <strong>Email:</strong> ${client.client_email}<br>
+                  <strong>Mobile:</strong> ${client.client_no}<br>
+                  <strong>Date:</strong> ${client.date}
+                </div>`;
+            });
+          } else {
+            eventList.innerHTML = "<p>No past event found.</p>";
+          }
+        })
+        .catch(() => {
+          document.getElementById('eventList').innerHTML = "<p>Error loading events.</p>";
+        });
+    }
+
+    // Fetch images
+    async function fetchImages() {
+      try {
+        const res = await fetch("/get-images-photographer");
+        const data = await res.json();
+        const marketplace = document.getElementById("marketplace");
+        marketplace.innerHTML = "";
+
+        data.images.forEach(image => {
+          const card = document.createElement("div");
+          card.className = "image-card";
+          card.innerHTML = `<img src="${image.url}" alt="" onclick="expandImage('${image.url}')">`;
+          marketplace.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error fetching images:", err);
+      }
+    }
+    fetchImages();
+  </script>
+</body>
 </html>

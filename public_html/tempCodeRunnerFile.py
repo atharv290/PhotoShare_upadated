@@ -7,12 +7,9 @@ import base64
 import os
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify
-from flask_mysqldb import MySQL
 import random
 import datetime
 import string
-from google.cloud import vision
-from google.cloud.vision import ImageAnnotatorClient
 import io
 import numpy as np
 import pandas as pd
@@ -482,6 +479,7 @@ def fetch_profiles():
             full_name, profile_img, bio ,email,ratings= row  
             image_url = profile_img if profile_img else "/static/uploads/default-profile.jpg" 
             cost = estimate_cost(event_type, duration, photographers_count,event_location, editing_level, additional_services, ratings)
+            cost = cost+4000
             profiles.append({
                 'url': image_url,
                 'Full_name': full_name,
