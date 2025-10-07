@@ -1,16 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session,flash
-from flask_mysqldb import MySQL
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
+import pymysql
 import hashlib
 import os
-from email.mime.multipart import MIMEMultipart
-import base64
-import os
 from werkzeug.utils import secure_filename
-from flask import Flask, request, jsonify
 import random
 import datetime
 import string
-import io
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -18,84 +13,229 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from MySQLdb.cursors import DictCursor
 from sklearn.impute import SimpleImputer
+import joblib
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from io import BytesIO
+import zipfile
+
+app = Flask(__name__, 
+           template_folder='public_html/templates',
+           static_folder='public_html/static')
+
+# Render Configuration
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-render-123')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+
+# Cloudinary Configuration for File Storage
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', 'your-cloud-name'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY', 'your-api-key'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET', 'your-api-secret')
+)
+
+# Database Configuration
+def get_db_connection():
+    return pymysql.connect(
+        host=os.environ.get('MYSQL_HOST', 'sql12.freesqldatabase.com'),
+        user=os.environ.get('MYSQL_USER', 'sql12801823'),
+        password=os.environ.get('MYSQL_PASSWORD', '6cNzIaiaXD'),
+        database=os.environ.get('MYSQL_DB', 'sql12801823'),
+        port=3306,
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor,
+        ssl={'ssl': {'ca': '/etc/ssl/certs/ca-certificates.crt'}} if not os.environ.get('MYSQL_HOST', '').startswith('sql12') else None
+    )
+
+# Helper Functions
 def generate_random_code(length=8):
-    characters = string.ascii_letters + string.digits  # Combine letters and digits
+    characters = string.ascii_letters + string.digits
     return ''.join(random.choices(characters, k=length))
-# Load the dataset
-# Load the dataset
-if os.path.exists('public_html/Data/photography_dataset.csv'):
-    dataset_path = 'public_html/Data/photography_dataset.csv'
-    print(f"Dataset found at: {dataset_path}")
-    data = pd.read_csv(dataset_path, na_values=["", "NA", "N/A", "null"])  # Handle empty values
-    print("Dataset loaded successfully")
-else:
-    print("Dataset not found. Using default data.")
-    data = pd.DataFrame()  # Use an empty DataFrame as a fallback
 
-# Continue with your app logic
-if not data.empty:
-    # Check if required columns exist
-    required_columns = ['Event Type', 'Location', 'Editing Level', 'Additional Services',
-                        'Duration (hrs)', 'Photographers', 'Photographer Rating', 'Cost']
-    missing_columns = [col for col in required_columns if col not in data.columns]
-    
-    if missing_columns:
-        print(f"Missing required columns: {missing_columns}. Skipping model training.")
-    else:
-        # Define X and y
-        X = data.drop(columns=['Cost'])
-        y = data['Cost']
-
-        # Preprocessing features
-        categorical_features = ['Event Type', 'Location', 'Editing Level', 'Additional Services']
-        numeric_features = ['Duration (hrs)', 'Photographers', 'Photographer Rating']
-
-        # Define transformers
-        categorical_transformer = OneHotEncoder(handle_unknown='ignore')
-        numeric_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='mean'))
-        ])
-
-        # Build column transformer
-        preprocessor = ColumnTransformer([
-            ('cat', categorical_transformer, categorical_features),
-            ('num', numeric_transformer, numeric_features)
-        ])
-
-        # Create pipeline
-        model = Pipeline([
-            ('preprocessor', preprocessor),
-            ('regressor', LinearRegression())
-        ])
-
-        # Split the dataset
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        # Train the model
-        model.fit(X_train, y_train)
-        print("Model trained successfully")
-else:
-    print("No data available for processing. Skipping model training.")
-# Example usag
-app = Flask(__name__)
-# Set the directory for image uploads
-app.config['UPLOAD_FOLDER'] = 'public_html/static/uploads'
-# Set allowed file extensions for security
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
-# Check if the file is an allowed image format
 def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-#import mysql.connector
-app.secret_key = '1234'
-app.config['MYSQL_HOST'] = 'sql12.freesqldatabase.com'
-app.config['MYSQL_USER'] = 'sql12801823'
-app.config['MYSQL_PASSWORD'] = '6cNzIaiaXD'
-app.config['MYSQL_DB'] = 'sql12801823'
-app.config['MYSQL_PORT'] = 3306
-Dbname = 'sql12801823'
-Mysql = MySQL(app)
+
+def upload_to_cloudinary(file):
+    """Upload file to Cloudinary and return URL"""
+    try:
+        result = cloudinary.uploader.upload(file)
+        return result['secure_url']
+    except Exception as e:
+        print(f"Cloudinary upload error: {e}")
+        return None
+
+# ML Model Loading
+def load_model():
+    try:
+        model = joblib.load('model.pkl')
+        print("Pre-trained model loaded successfully")
+        return model
+    except:
+        print("No pre-trained model found")
+        return None
+
+model = load_model()
+
+def estimate_cost(event_type, duration, photographers, location, editing_level, additional_services, photographer_rating):
+    if model is None:
+        # Fallback pricing
+        base_price = 5000
+        return base_price + (int(duration) * 1000) + (int(photographers) * 2000)
+    
+    try:
+        input_data = pd.DataFrame([[event_type, duration, photographers, location, editing_level, additional_services, photographer_rating]],
+                                columns=['Event Type', 'Duration (hrs)', 'Photographers', 'Location', 'Editing Level', 'Additional Services', 'Photographer Rating'])
+        return model.predict(input_data)[0]
+    except:
+        base_price = 5000
+        return base_price + (int(duration) * 1000) + (int(photographers) * 2000)
+
+# Database Initialization
+def init_db():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Your existing table structure
+        tables = [
+            """
+            CREATE TABLE IF NOT EXISTS user_logins (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                Full_Name VARCHAR(255) NOT NULL,
+                Email VARCHAR(255) UNIQUE NOT NULL,
+                Password VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS admin_logins (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                Full_Name VARCHAR(255) NOT NULL,
+                Email VARCHAR(255) UNIQUE NOT NULL,
+                Password VARCHAR(255) NOT NULL,
+                bio TEXT,
+                profile_img VARCHAR(500),
+                ratings FLOAT DEFAULT 4.0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS images2 (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                image_path VARCHAR(500),
+                filename VARCHAR(255),
+                Status ENUM('public', 'private'),
+                code VARCHAR(50),
+                client_email VARCHAR(255),
+                Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                client_name VARCHAR(255),
+                client_no VARCHAR(20),
+                price DECIMAL(10,2),
+                owner VARCHAR(255),
+                cloud_url VARCHAR(500)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS uploads_details (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                client_name VARCHAR(255),
+                client_email VARCHAR(255),
+                client_no VARCHAR(20),
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                owner VARCHAR(255)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS photographer_posts (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                caption TEXT,
+                Email VARCHAR(255),
+                Likes INT DEFAULT 0,
+                post VARCHAR(500),
+                filename VARCHAR(255),
+                like_count INT DEFAULT 0,
+                cloud_url VARCHAR(500),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS views (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                client_email VARCHAR(255),
+                image_url VARCHAR(500),
+                Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS photographer_hiring_requests (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255),
+                email VARCHAR(255),
+                event_type VARCHAR(100),
+                duration INT,
+                photographers_count INT,
+                event_location VARCHAR(255),
+                editing_level VARCHAR(100),
+                additional_services TEXT,
+                photographer_rating FLOAT,
+                additional_details TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS likes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255),
+                filename VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS hires (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_email VARCHAR(255),
+                photographer_email VARCHAR(255),
+                event_type VARCHAR(100),
+                event_date DATE,
+                event_location VARCHAR(255),
+                contact_info VARCHAR(255),
+                special_requests TEXT,
+                additional_info TEXT,
+                budget DECIMAL(10,2),
+                status ENUM('pending', 'accepted', 'declined') DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS cart (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_email VARCHAR(255) NOT NULL,
+                image_id INT NOT NULL,
+                filename VARCHAR(255) NOT NULL,
+                price DECIMAL(10, 2) NOT NULL,
+                image_url TEXT NOT NULL,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        ]
+        
+        for table_query in tables:
+            cur.execute(table_query)
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Database initialized successfully")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+
+# Initialize database on startup
+with app.app_context():
+    init_db()
+
 # Home Page
 @app.route('/')
 def home():
