@@ -89,10 +89,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 #import mysql.connector
 app.secret_key = '1234'
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'sen_project'
+app.config['MYSQL_HOST'] = 'sql12.freesqldatabase.com'
+app.config['MYSQL_USER'] = 'sql12801823'
+app.config['MYSQL_PASSWORD'] = '6cNzIaiaXD'
+app.config['MYSQL_DB'] = 'sql12801823'
+app.config['MYSQL_PORT'] = 3306
+Dbname = 'sql12801823'
 Mysql = MySQL(app)
 # Home Page
 @app.route('/')
@@ -183,7 +185,7 @@ def admin_l():
             profile_data = {
                 'name': user1[0], 
                 'bio': user1[1],   
-                'profile_img': user1[2] if user1[2] else "static/uploads/default-profile.jpg"
+                'profile_img': "uploads/" + user1[2] if user1[2] else "static/uploads/default-profile.jpg"
             }
         else:
             profile_data = None  
@@ -262,10 +264,10 @@ def get_images():
 
         # Modify the query to support LIMIT and OFFSET for pagination
         if session.get('accessType') == 'private':
-            query = "SELECT filename, image_path, price FROM images2 WHERE code = %s LIMIT %s OFFSET %s"
+            query = "SELECT filename,id, image_path, price FROM images2 WHERE code = %s LIMIT %s OFFSET %s"
             cur.execute(query, (session['secretCode'], per_page, (page - 1) * per_page))
         else:
-            query = "SELECT filename, image_path, price FROM images2 WHERE Status = %s LIMIT %s OFFSET %s"
+            query = "SELECT filename,id,image_path, price FROM images2 WHERE Status = %s LIMIT %s OFFSET %s"
             cur.execute(query, ('public', per_page, (page - 1) * per_page))
 
         rows = cur.fetchall()
@@ -275,13 +277,14 @@ def get_images():
 
         images = []
         for row in rows:
-            filename, image_path, price = row  # Ensure correct unpacking
+            filename,id, image_path, price = row  # Ensure correct unpacking
             image_url = f"static/uploads/{filename}"  # Construct the URL for accessing the image
             
             images.append({
                 'url': image_url,
                 'filename': filename,
-                'price': price  # Include price in the response
+                'price': price,
+                'image_id':id # Include price in the response
             })
 
         # You can also return the total number of pages or images to help with frontend pagination
@@ -303,67 +306,96 @@ def get_images():
         if 'cur' in locals() and cur:
             cur.close()
 
-
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
     if 'admin_email' not in session:
         return "Unauthorized", 403  
-    
+
     new_name = request.form.get('name')
     new_bio = request.form.get('bio')
     file = request.files.get('profile_pic')
-    
-    if file and file.filename != '' and allowed_file(file.filename):
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
-        
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file_path = file_path.replace("\\", "/")  # Normalize path for cross-platform support
-        file.save(file_path)  # Save the file
-        
-        relative_path = f"static/uploads/{filename}"  # Ensure it's relative
-        
+
+    try:
         cur = Mysql.connection.cursor()
-        query1 = "SELECT profile_img FROM admin_logins WHERE Email = %s"
         email = session['admin_email']
-        cur.execute(query1, (email,))  # Pass the email as a tuple
+        
+        # Fetch old profile image path
+        cur.execute("SELECT profile_img FROM admin_logins WHERE Email = %s", (email,))
         row = cur.fetchone()
-        
-        if row and row[0] and os.path.exists(f"public_html/{row[0]}"):
-            os.remove(f"public_html/{row[0]}")
-        
+        old_profile_img = row[0] if row and row[0] else None
+
+        # Initialize image_path variable
+        image_path = None
+
+        if file and file.filename != '' and allowed_file(file.filename):
+            # Use the same UPLOAD_FOLDER as other functions
+            upload_dir = app.config['UPLOAD_FOLDER']
+            
+            # Ensure upload directory exists
+            if not os.path.exists(upload_dir):
+                os.makedirs(upload_dir)
+                print(f"Created directory: {upload_dir}")
+
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(upload_dir, filename)
+
+            # Save the new file
+            file.save(file_path)
+            print(f"File saved to: {file_path}")
+
+            # Delete old file if it exists
+            if old_profile_img:
+                # Extract filename from old path and build full path
+                old_filename = os.path.basename(old_profile_img)
+                old_file_path = os.path.join(upload_dir, old_filename)
+                
+                if os.path.exists(old_file_path) and old_filename != filename:
+                    try:
+                        os.remove(old_file_path)
+                        print(f"Deleted old file: {old_file_path}")
+                    except Exception as e:
+                        print(f"Could not delete old image: {e}")
+
+            # Store only the filename in database (same as get_images_photographer)
+            image_path = filename
+
+        else:
+            # If no new file, keep the existing filename
+            if old_profile_img:
+                image_path = os.path.basename(old_profile_img)
+
+        # Update database with new info - store only filename
+        cur.execute(
+            "UPDATE admin_logins SET Full_Name = %s, bio = %s, profile_img = %s WHERE Email = %s",
+            (new_name, new_bio, image_path, email)
+        )
+        Mysql.connection.commit()
+
+        # Fetch updated data for rendering
+        cur.execute("SELECT Full_Name, bio, profile_img FROM admin_logins WHERE Email = %s", (email,))
+        user = cur.fetchone()
+
+        # Construct URL exactly like get_images_photographer does
+        if user[2]:  # If profile_img exists
+            profile_img_url = f"uploads/{user[2]}"
+        else:
+            profile_img_url = "static/uploads/default-profile.jpg"
+
+        profile_data = {
+            'name': user[0],
+            'bio': user[1],
+            'profile_img': profile_img_url
+        }
+
+        return render_template('adminHome.html', profile=profile_data)
+
+    except Exception as e:
+        print(f"Error in update_profile: {e}")
+        return f"Error: {e}", 500
+
+    finally:
         cur.close()
-        
-        try:
-            cur = Mysql.connection.cursor()
-            query = "UPDATE admin_logins SET Full_Name = %s, profile_img = %s, bio = %s WHERE Email = %s"
-            cur.execute(query, (new_name, relative_path, new_bio, session['admin_email']))
-            Mysql.connection.commit()
-            
-            # Fetch updated profile data
-            cur.execute("SELECT Full_Name, bio, profile_img FROM admin_logins WHERE Email = %s", (session['admin_email'],))
-            user1 = cur.fetchone()
-            
-            if user1:
-                profile_data = {
-                    'name': user1[0], 
-                    'bio': user1[1],   
-                    'profile_img': user1[2] if user1[2] else "static/uploads/default-profile.jpg"
-                }
-            else:
-                profile_data = None
-            
-            # Render the adminHome.html page with updated profile data
-            return render_template('adminHome.html', profile=profile_data)
-        
-        except Exception as err:
-            return f"Error: {err}", 500
-        
-        finally:
-            cur.close()
-    
-    return "Invalid file or no file uploaded!", 400
+
 @app.route('/get-images-photographer', methods=['GET'])
 def get_images_photographer():
     try:
@@ -477,7 +509,7 @@ def fetch_profiles():
         profiles = []
         for row in rows:
             full_name, profile_img, bio ,email,ratings= row  
-            image_url = profile_img if profile_img else "/static/uploads/default-profile.jpg" 
+            image_url = "/static/uploads/"+profile_img if profile_img else "/static/uploads/default-profile.jpg" 
             cost = estimate_cost(event_type, duration, photographers_count,event_location, editing_level, additional_services, ratings)
             cost = cost+4000
             profiles.append({
@@ -515,7 +547,7 @@ def photographer_profile(email):
         return "Photographer not found", 404
 
     full_name, profile_img, bio = photographer
-    profile_img = profile_img if profile_img else "static/uploads/default-profile.jpg"
+    profile_img ="uploads/"+ profile_img if profile_img else "static/uploads/default-profile.jpg"
 
     # Fetch photographer's images
     query_images = "SELECT filename FROM photographer_posts WHERE Email = %s"
@@ -632,26 +664,47 @@ def like_post():
         return jsonify({'error': 'Internal Server Error'}), 500
 @app.route('/hire', methods=['POST'])
 def hire():
-    data = request.form
-    if data:
-        print("data received:",data)
-        print(session['email'])
-    user_email = session['email']
-    photographer_email = data.get('photographerEmail')
-    event_type = data.get('eventType')
-    event_date = data.get('eventDate')
-    event_location = data.get('eventLocation')
-    contact_info = data.get('contactInfo')
-    special_requests = data.get('specialRequests')
-    additional_info = data.get('additionalInfo')
-    budget = data.get('budget')
-    # Insert data into the MySQL database
-    cursor = Mysql.connect.cursor()
-    query = "INSERT INTO hires (user_email, photographer_email, event_type, event_date, event_location, contact_info, special_requests, additional_info, budget)VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    values = (user_email, photographer_email, event_type, event_date, event_location, contact_info, special_requests, additional_info, budget)
-    cursor.execute(query, values)
-    cursor.close()
-    return jsonify(success=True)
+    try:
+        # Check if user is logged in
+        if 'email' not in session:
+            return jsonify({'success': False, 'message': 'Please login first'}), 401
+        
+        data = request.form
+        print("data received:", data)
+        print("user email:", session['email'])
+        
+        user_email = session['email']
+        photographer_email = data.get('photographerEmail')
+        event_type = data.get('eventType')
+        event_date = data.get('eventDate')
+        event_location = data.get('eventLocation')
+        contact_info = data.get('contactInfo')
+        special_requests = data.get('specialRequests')
+        additional_info = data.get('additionalInfo')
+        budget = data.get('budget')
+        
+        # Validate required fields
+        if not all([user_email, photographer_email, event_type, event_date, event_location, contact_info, budget]):
+            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+        
+        # Insert data into the MySQL database
+        cursor = Mysql.connection.cursor()  # Fixed: should be connection, not connect
+        query = """INSERT INTO hires 
+                   (user_email, photographer_email, event_type, event_date, event_location, 
+                    contact_info, special_requests, additional_info, budget, status) 
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')"""
+        values = (user_email, photographer_email, event_type, event_date, event_location, 
+                 contact_info, special_requests, additional_info, budget)
+        
+        cursor.execute(query, values)
+        Mysql.connection.commit()  # Added: commit the transaction
+        cursor.close()
+        
+        return jsonify({'success': True, 'message': 'Hiring request sent successfully!'})
+        
+    except Exception as e:
+        print(f"Error in hire function: {e}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
 @app.route('/get_private_codes', methods=['GET'])
 def get_private_codes():
@@ -703,6 +756,420 @@ def get_past_events():
         return jsonify({'clients': results})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# Add this endpoint to get hiring requests for the photographer
+@app.route('/get-hiring-requests', methods=['GET'])
+def get_hiring_requests():
+    if 'admin_email' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    photographer_email = session['admin_email']
+    
+    try:
+        cur = Mysql.connection.cursor()
+        # Query to get hiring requests for this photographer
+        query = """
+            SELECT id, user_email, photographer_email, event_type, event_date, 
+                   event_location, contact_info, special_requests, additional_info, 
+                   budget, status, created_at
+            FROM hires 
+            WHERE photographer_email = %s 
+            ORDER BY created_at DESC
+        """
+        cur.execute(query, (photographer_email,))
+        rows = cur.fetchall()
+        
+        requests = []
+        for row in rows:
+            requests.append({
+                'id': row[0],
+                'user_email': row[1],
+                'photographer_email': row[2],
+                'event_type': row[3],
+                'event_date': str(row[4]) if row[4] else None,
+                'event_location': row[5],
+                'contact_info': row[6],
+                'special_requests': row[7],
+                'additional_info': row[8],
+                'budget': row[9],
+                'status': row[10],
+                'created_at': str(row[11]) if row[11] else None
+            })
+        
+        return jsonify({'requests': requests}), 200
+        
+    except Exception as e:
+        print(f"Error fetching hiring requests: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            cur.close()
+
+# Add this endpoint to handle accept/decline responses
+@app.route('/respond-to-request', methods=['POST'])
+def respond_to_request():
+    if 'admin_email' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        data = request.get_json()
+        request_id = data.get('request_id')
+        response = data.get('response')  # 'accepted' or 'declined'
+        
+        if not request_id or response not in ['accepted', 'declined']:
+            return jsonify({'success': False, 'message': 'Invalid request data'}), 400
+        
+        cur = Mysql.connection.cursor()
+        
+        # First verify the request belongs to this photographer
+        cur.execute("SELECT photographer_email FROM hires WHERE id = %s", (request_id,))
+        request_data = cur.fetchone()
+        
+        if not request_data:
+            return jsonify({'success': False, 'message': 'Request not found'}), 404
+            
+        if request_data[0] != session['admin_email']:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        # Update the request status
+        update_query = "UPDATE hires SET status = %s WHERE id = %s"
+        cur.execute(update_query, (response, request_id))
+        Mysql.connection.commit()
+        
+        # If accepted, you might want to send an email notification here
+        if response == 'accepted':
+            # Get user email to send confirmation
+            cur.execute("SELECT user_email FROM hires WHERE id = %s", (request_id,))
+            user_email = cur.fetchone()[0]
+            print(f"Sending confirmation to {user_email}")  # Replace with actual email sending
+        
+        return jsonify({'success': True, 'message': f'Request {response} successfully'})
+        
+    except Exception as e:
+        print(f"Error responding to request: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            cur.close()
+
+@app.route('/get-user-notifications', methods=['GET'])
+def get_user_notifications():
+    if 'email' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    user_email = session['email']
+    
+    try:
+        cur = Mysql.connection.cursor()
+        # Query to get hiring requests for this user
+        query = """
+            SELECT id, user_email, photographer_email, event_type, event_date, 
+                   event_location, contact_info, special_requests, additional_info, 
+                   budget, status, created_at
+            FROM hires 
+            WHERE user_email = %s 
+            ORDER BY created_at DESC
+        """
+        cur.execute(query, (user_email,))
+        rows = cur.fetchall()
+        
+        requests = []
+        for row in rows:
+            requests.append({
+                'id': row[0],
+                'user_email': row[1],
+                'photographer_email': row[2],
+                'event_type': row[3],
+                'event_date': str(row[4]) if row[4] else None,
+                'event_location': row[5],
+                'contact_info': row[6],
+                'special_requests': row[7],
+                'additional_info': row[8],
+                'budget': row[9],
+                'status': row[10],
+                'created_at': str(row[11]) if row[11] else None
+            })
+        
+        return jsonify({'requests': requests}), 200
+        
+    except Exception as e:
+        print(f"Error fetching user notifications: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            cur.close()
+
+
+# Create cart table first
+def create_cart_table():
+    try:
+        cur = Mysql.connection.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS cart (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_email VARCHAR(255) NOT NULL,
+                image_id INT NOT NULL,
+                filename VARCHAR(255) NOT NULL,
+                price DECIMAL(10, 2) NOT NULL,
+                image_url TEXT NOT NULL,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_email) REFERENCES user_logins(Email),
+                FOREIGN KEY (image_id) REFERENCES images2(id)
+            )
+        """)
+        Mysql.connection.commit()
+        cur.close()
+        print("Cart table created successfully")
+    except Exception as e:
+        print(f"Error creating cart table: {e}")
+
+# Call this when your app starts
+create_cart_table()
+
+@app.route('/add-to-cart', methods=['POST'])
+def add_to_cart():
+    if 'email' not in session:
+        return jsonify({'success': False, 'message': 'Please login first'}), 401
+    
+    try:
+        data = request.get_json()
+        user_email = session['email']
+        image_id = data.get('image_id')
+        filename = data.get('filename')
+        price = data.get('price')
+        image_url = data.get('image_url')
+        
+        # Check if item already in cart
+        cur = Mysql.connection.cursor()
+        cur.execute("SELECT id FROM cart WHERE user_email = %s AND image_id = %s", (user_email, image_id))
+        existing_item = cur.fetchone()
+        
+        if existing_item:
+            return jsonify({'success': False, 'message': 'Item already in cart'}), 400
+        
+        # Add to cart
+        cur.execute("""
+            INSERT INTO cart (user_email, image_id, filename, price, image_url) 
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_email, image_id, filename, price, image_url))
+        
+        Mysql.connection.commit()
+        cur.close()
+        
+        return jsonify({'success': True, 'message': 'Item added to cart'})
+        
+    except Exception as e:
+        print(f"Error adding to cart: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/get-cart-items', methods=['GET'])
+def get_cart_items():
+    if 'email' not in session:
+        return jsonify({'success': False, 'message': 'Please login first'}), 401
+    
+    try:
+        user_email = session['email']
+        cur = Mysql.connection.cursor()
+        cur.execute("""
+            SELECT id, image_id, filename, price, image_url 
+            FROM cart 
+            WHERE user_email = %s 
+            ORDER BY added_at DESC
+        """, (user_email,))
+        
+        items = []
+        for row in cur.fetchall():
+            items.append({
+                'cart_id': row[0],
+                'image_id': row[1],
+                'filename': row[2],
+                'price': float(row[3]),
+                'image_url': row[4]
+            })
+        
+        cur.close()
+        return jsonify({'success': True, 'items': items})
+        
+    except Exception as e:
+        print(f"Error getting cart items: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/get-cart-count', methods=['GET'])
+def get_cart_count():
+    if 'email' not in session:
+        return jsonify({'count': 0})
+    
+    try:
+        user_email = session['email']
+        cur = Mysql.connection.cursor()
+        cur.execute("SELECT COUNT(*) FROM cart WHERE user_email = %s", (user_email,))
+        count = cur.fetchone()[0]
+        cur.close()
+        return jsonify({'count': count})
+    except Exception as e:
+        print(f"Error getting cart count: {e}")
+        return jsonify({'count': 0})
+
+@app.route('/remove-from-cart', methods=['POST'])
+def remove_from_cart():
+    if 'email' not in session:
+        return jsonify({'success': False, 'message': 'Please login first'}), 401
+    
+    try:
+        data = request.get_json()
+        cart_id = data.get('cart_id')
+        user_email = session['email']
+        
+        cur = Mysql.connection.cursor()
+        cur.execute("DELETE FROM cart WHERE id = %s AND user_email = %s", (cart_id, user_email))
+        Mysql.connection.commit()
+        cur.close()
+        
+        return jsonify({'success': True, 'message': 'Item removed from cart'})
+        
+    except Exception as e:
+        print(f"Error removing from cart: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    if 'email' not in session:
+        return jsonify({'success': False, 'message': 'Please login first'}), 401
+    
+    try:
+        user_email = session['email']
+        cur = Mysql.connection.cursor()
+        
+        # Get cart items with filenames
+        cur.execute("SELECT image_id, filename, price FROM cart WHERE user_email = %s", (user_email,))
+        cart_items = cur.fetchall()
+        
+        if not cart_items:
+            return jsonify({'success': False, 'message': 'Cart is empty'}), 400
+        
+        # Calculate total amount
+        total_amount = sum(float(item[2]) for item in cart_items)
+        
+        # Store filenames in session for download
+        filenames = [item[1] for item in cart_items]
+        
+        # Clear the cart
+        cur.execute("DELETE FROM cart WHERE user_email = %s", (user_email,))
+        Mysql.connection.commit()
+        cur.close()
+        
+        # If free items, store filenames in session for download
+        if total_amount == 0:
+            session['download_filenames'] = filenames
+            return jsonify({
+                'success': True, 
+                'message': f'Order placed successfully! Total: ₹{total_amount:.2f}',
+                'total': total_amount,
+                'download_required': True
+            })
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Order placed successfully! Total: ₹{total_amount:.2f}',
+            'total': total_amount,
+            'download_required': False
+        })
+        
+    except Exception as e:
+        print(f"Error during checkout: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/download-free-images')
+def download_free_images():
+    if 'email' not in session or 'download_filenames' not in session:
+        return "No download available", 404
+    
+    try:
+        filenames = session.get('download_filenames', [])
+        
+        if not filenames:
+            return "No images to download", 400
+        
+        # Create a zip file containing all images
+        import zipfile
+        import os
+        from io import BytesIO
+        
+        zip_buffer = BytesIO()
+        successful_downloads = 0
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for i, filename in enumerate(filenames):
+                try:
+                    # Build the full file path
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    
+                    # Check if file exists
+                    if os.path.exists(file_path):
+                        with open(file_path, 'rb') as img_file:
+                            # Use original filename with sequence number for organization
+                            zip_filename = f"{i+1:02d}_{filename}"
+                            zip_file.writestr(zip_filename, img_file.read())
+                        successful_downloads += 1
+                        print(f"Successfully added {filename} to zip")
+                    else:
+                        print(f"File not found: {file_path}")
+                except Exception as e:
+                    print(f"Error adding {filename} to zip: {e}")
+                    continue
+        
+        zip_buffer.seek(0)
+        
+        # Clear download session
+        session.pop('download_filenames', None)
+        
+        if successful_downloads == 0:
+            return "No files were found to download", 404
+        
+        # Return the zip file
+        from flask import send_file
+        return send_file(
+            zip_buffer,
+            as_attachment=True,
+            download_name=f'galleryloop_images_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.zip',
+            mimetype='application/zip'
+        )
+        
+    except Exception as e:
+        print(f"Error creating download: {e}")
+        return f"Error creating download: {str(e)}", 500
+
+@app.route('/direct-purchase', methods=['POST'])
+def direct_purchase():
+    if 'email' not in session:
+        return jsonify({'success': False, 'message': 'Please login first'}), 401
+    
+    try:
+        data = request.get_json()
+        user_email = session['email']
+        image_id = data.get('image_id')
+        filename = data.get('filename')
+        price = data.get('price')
+        
+        # Store single filename in session for immediate download
+        if float(price) == 0:
+            session['download_filenames'] = [filename]
+            return jsonify({
+                'success': True, 
+                'message': f'Purchase successful! {filename} for ₹{price}',
+                'download_required': True
+            })
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Purchase successful! {filename} for ₹{price}',
+            'download_required': False
+        })
+        
+    except Exception as e:
+        print(f"Error during direct purchase: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

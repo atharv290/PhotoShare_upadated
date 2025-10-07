@@ -1,179 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GalleryLoop - Admin Login & Signup</title>
-    <style>
-        /* Global Styles */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, #e0e7ff, #ffffff);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GalleryLoop - Admin Login & Signup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #ffffff;
-            width: 90%;
-            max-width: 800px;
-            margin: 20px;
-        }
+body {
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color:#2d3748;
+    overflow:hidden;
+}
 
-        .form-section {
-            padding: 30px;
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+.container {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:0;
+    width:90%;
+    max-width:1000px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius:20px;
+    overflow:hidden;
+    min-height:85vh;
+}
 
-        .form-section h2 {
-            margin-bottom: 20px;
-            color: #5a67d8;
-            font-size: 24px;
-        }
+/* Form sections */
+.form-section {
+    padding:40px 30px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    border-right: 1px solid rgba(226,232,240,0.5);
+}
 
-        .form-section form {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
+#signup { border-right:none; border-left: 1px solid rgba(226,232,240,0.5); }
 
-        .form-section input {
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-            width: 100%;
-        }
+.form-section h2 {
+    margin-bottom:8px;
+    font-size:28px;
+    font-weight:700;
+    text-align:center;
+}
 
-        .form-section button {
-            padding: 10px;
-            background-color: #5a67d8;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-        }
+.form-section .subtitle {
+    font-size:16px;
+    color:#718096;
+    margin-bottom:30px;
+    text-align:center;
+}
 
-        .form-section button:hover {
-            background-color: #434aa8;
-        }
+.form-section form { width:100%; display:flex; flex-direction:column; gap:20px; }
 
-        .form-section p {
-            font-size: 14px;
-            text-align: center;
-            margin-top: 15px;
-        }
+.input-group { position:relative; }
+.input-group i {
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    color:#a0aec0;
+}
+.input-group input {
+    width:100%; padding:14px 20px 14px 50px;
+    border-radius:12px; border:2px solid #e2e8f0;
+    font-size:16px;
+    transition: all 0.3s ease;
+}
+.input-group input:focus { outline:none; border-color:#667eea; background:#fff; }
 
-        .form-section p a {
-            color: #5a67d8;
-            text-decoration: none;
-        }
+.form-section button {
+    padding:14px 20px; border:none; border-radius:12px;
+    font-size:16px; font-weight:600; cursor:pointer;
+    color:#fff; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    transition: all 0.3s ease;
+}
+.form-section button:hover { transform: translateY(-2px); box-shadow:0 10px 20px rgba(102,126,234,0.3); }
 
-        .form-section p a:hover {
-            text-decoration: underline;
-        }
+.form-section p { margin-top:20px; font-size:14px; text-align:center; }
+.form-section p a { color:#667eea; font-weight:600; text-decoration:none; }
 
-        .background-section {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(to top, #434aa8, #5a67d8);
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+/* Background section */
+.background-section {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background: linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);
+    color:#fff;
+    padding:40px 20px;
+}
+.background-section i { font-size:64px; margin-bottom:20px; opacity:0.8; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+.background-section h1 { font-size:36px; font-weight:700; margin-bottom:16px; }
+.background-section .tagline { font-size:18px; opacity:0.9; }
 
-        .background-section h1 {
-            font-size: 24px;
-            font-weight: bold;
-        }
+/* Desktop grid layout */
+@media(min-width:768px) {
+    .container {
+        grid-template-columns: 1fr 1fr 1fr;
+        min-height:70vh;
+    }
+    #login { grid-column:1 / 2; border-right:1px solid rgba(226,232,240,0.5);}
+    .background-section { grid-column:2 / 3; }
+    #signup { grid-column:3 / 4; border-left:1px solid rgba(226,232,240,0.5); border-right:none; }
+}
 
-        .error-message {
-            color: red;
-            font-size: 12px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        /* Responsive Design */
-        @media (min-width: 768px) {
-            .container {
-                flex-direction: row;
-            }
-
-            .form-section {
-                width: 50%;
-            }
-
-            .background-section {
-                width: 50%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .form-section h2 {
-                font-size: 20px;
-            }
-
-            .background-section h1 {
-                font-size: 20px;
-            }
-
-            .form-section input, .form-section button {
-                font-size: 12px;
-            }
-        }
-    </style>
+/* Mobile */
+@media(max-width:767px){
+    .container { display:flex; flex-direction:column; }
+    .form-section, .background-section { width:100%; border:none; padding:30px 20px; }
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Section -->
-        <div class="form-section" id="login">
-            <h2>Admin Login</h2>
-            <form action="/admin_l" method="POST">
-                {% if error %}
-                    <div class="error-message">{{ error }}</div>
-                {% endif %}
+<div class="container">
+    <!-- Login -->
+    <div class="form-section" id="login">
+        <h2>Admin Login</h2>
+        <p class="subtitle">Welcome back! Please sign in.</p>
+        <form action="/admin_l" method="POST">
+            {% if error %}<div style="color:red;text-align:center;">{{ error }}</div>{% endif %}
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
                 <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
                 <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Login</button>
-            </form>
-            <p>Don't have an account? <a href="/admin_s">Sign Up</a></p>
-        </div>
-
-        <!-- Decorative Section -->
-        <div class="background-section">
-            <h1>Welcome to GalleryLoop</h1>
-        </div>
-
-        <!-- Signup Section -->
-        <div class="form-section" id="signup">
-            <h2>Admin Sign Up</h2>
-            <form action="/admin_s" method="POST">
-                <input type="text" name="name" placeholder="Full Name" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
+            </div>
+            <button type="submit"><i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>Login</button>
+        </form>
+        <p>Don't have an account? <a href="/admin_s">Sign Up</a></p>
     </div>
+
+    <!-- Background -->
+    <div class="background-section">
+        <i class="fas fa-images"></i>
+        <h1>Welcome to GalleryLoop</h1>
+        <p class="tagline">Manage your creative world with ease</p>
+    </div>
+
+    <!-- Signup -->
+    <div class="form-section" id="signup">
+        <h2>Admin Sign Up</h2>
+        <p class="subtitle">Join us today!</p>
+        <form action="/admin_s" method="POST">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="name" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit"><i class="fas fa-user-plus" style="margin-right:8px;"></i>Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="/admin_l">Login</a></p>
+    </div>
+</div>
 </body>
 </html>

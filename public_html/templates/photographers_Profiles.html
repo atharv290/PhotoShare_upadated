@@ -1,116 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photographer Profiles</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        
-        .header {
-            text-align: left;
-            background: #222;
-            color: #fff;
-            padding: 20px;
-            font-size: 28px;
-            font-weight: bold;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photographer Profiles - GalleryLoop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-        }
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #2d3748;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 40px auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .profile-card {
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease-in-out;
-            cursor: pointer;
-        }
-        
-        .profile-card:hover {
-            transform: scale(1.05);
-        }
-        
-        .profile-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        
-        .profile-content {
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .profile-content h2 {
-            margin: 10px 0 5px;
-            font-size: 22px;
-            color: #333;
-        }
-        
-        .profile-content p {
-            font-size: 14px;
-            color: #666;
-        }
-    </style>
+    /* Header */
+    .header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      color: #4c51bf;
+      text-align: left;
+      padding: 20px 30px;
+      font-size: 28px;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header span {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Container grid */
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 50px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+    }
+
+    /* Profile card */
+    .profile-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 28px rgba(118, 75, 162, 0.3);
+    }
+
+    .profile-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      transition: 0.4s ease;
+    }
+
+    .profile-card:hover .profile-img {
+      transform: scale(1.05);
+    }
+
+    .profile-content {
+      padding: 18px;
+      text-align: center;
+    }
+
+    .profile-content h2 {
+      margin: 10px 0 6px;
+      font-size: 20px;
+      color: #4c51bf;
+      font-weight: 700;
+    }
+
+    .profile-content p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    .price-tag {
+      display: inline-block;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+    }
+
+    /* Empty message */
+    .empty {
+      text-align: center;
+      font-size: 18px;
+      color: white;
+      font-weight: 500;
+      margin-top: 40px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+      .profile-content h2 {
+        font-size: 18px;
+      }
+      .container {
+        margin-top: 30px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="header">Photographer Profiles</div>
-    <div class="container" id="profiles-container">
-        <!-- Profiles will be dynamically loaded here -->
-    </div>
-   
-    <script>
-        async function fetchProfiles() {
-            try {
-                const response = await fetch("/fetchProfiles"); 
-                const data = await response.json();
+  <div class="header">
+    <div><i class="fa-solid fa-camera-retro"></i> <span>Photographer Profiles</span></div>
+  </div>
 
-                const container = document.getElementById("profiles-container");
-                container.innerHTML = ""; // Clear existing content
+  <div class="container" id="profiles-container">
+    <!-- Profiles dynamically injected here -->
+  </div>
 
-                if (data.profile.length === 0) {
-                    container.innerHTML = "<p>No profiles found.</p>";
-                    return;
-                }
+  <script>
+    async function fetchProfiles() {
+      try {
+        const response = await fetch("/fetchProfiles");
+        const data = await response.json();
 
-                data.profile.forEach((profile) => {
-                    const card = document.createElement("div");
-                    card.className = "profile-card";
-                    card.onclick = function () {
-                        window.location.href = `/photographer/${encodeURIComponent(profile.email)}`;
-                    };
+        const container = document.getElementById("profiles-container");
+        container.innerHTML = "";
 
-                    card.innerHTML = `
-                        <img src="${profile.url}" alt="Profile" class="profile-img">
-                        <div class="profile-content">
-                            <h2>${profile.Full_name}</h2>
-                            <p>${profile.bio}</p>
-                            <p>${profile.cost}</p>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error fetching profiles:", error);
-                document.getElementById("profiles-container").innerHTML = "<p>Failed to load profiles.</p>";
-            }
+        if (!data.profile || data.profile.length === 0) {
+          container.innerHTML = "<p class='empty'>No photographer profiles found.</p>";
+          return;
         }
-        fetchProfiles();
-    </script>
+
+        data.profile.forEach((profile) => {
+          const card = document.createElement("div");
+          card.className = "profile-card";
+          card.onclick = () => {
+            window.location.href = `/photographer/${encodeURIComponent(profile.email)}`;
+          };
+
+          card.innerHTML = `
+            <img src="${profile.url}" alt="Profile" class="profile-img">
+            <div class="profile-content">
+              <h2>${profile.Full_name}</h2>
+              <p>${profile.bio || 'No bio available'}</p>
+              <div class="price-tag">₹${profile.cost}</div>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+        document.getElementById("profiles-container").innerHTML = "<p class='empty'>Failed to load profiles.</p>";
+      }
+    }
+
+    fetchProfiles();
+  </script>
 </body>
 </html>

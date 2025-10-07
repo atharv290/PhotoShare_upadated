@@ -3,134 +3,290 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Photographers Dashboard</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>GalleryLoop - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f8f9fa;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #2d3748;
+      overflow-x: hidden;
     }
 
     /* Navbar */
     .navbar {
-      background: #ffffff;
-      border-bottom: 1px solid #e9ecef;
-    }
-    .navbar-brand {
-      font-weight: 600;
-      color: #343a40 !important;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      padding: 0.8rem 1.2rem;
     }
 
-    /* Profile */
+    .navbar-brand {
+      font-weight: 700;
+      color: #4c51bf !important;
+    }
+
+    .navbar .btn {
+      border-radius: 12px;
+      transition: 0.2s;
+    }
+
+    .navbar .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(118, 75, 162, 0.25);
+    }
+
+    /* Profile Card */
     .profile-header {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1rem 1.5rem;
     }
+
+    .profile-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 850px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
     .profile-pic {
-      width: 110px;
-      height: 110px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
+      border: 4px solid #667eea;
+    }
+
+    .profile-info h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-top: 1rem;
+      color: #2d3748;
+    }
+
+    .profile-info p {
+      color: #718096;
+      font-size: 0.95rem;
       margin-bottom: 1rem;
     }
-    .profile-info h1 {
-      font-size: 1.5rem;
-      margin: 0;
-    }
-    .profile-info p {
-      font-size: 0.95rem;
-      color: #6c757d;
-    }
+
     .profile-buttons .btn {
-      border-radius: 20px;
+      border-radius: 12px;
+      padding: 0.45rem 1.25rem;
       font-size: 0.9rem;
     }
 
-    /* Marketplace Grid */
+    /* Marketplace */
     .marketplace {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2rem;
     }
+
+    .image-card {
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .image-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(118, 75, 162, 0.35);
+    }
+
     .image-card img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: .5rem;
-      cursor: pointer;
-      transition: transform .2s;
-    }
-    .image-card img:hover {
-      transform: scale(1.03);
+      display: block;
     }
 
-    /* Modal images */
+    /* Modal Styling */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal h5 {
+      color: #4c51bf;
+      font-weight: 600;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      padding: 0.6rem 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 12px;
+      transition: 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(118, 75, 162, 0.3);
+    }
+
     .modal-img {
-      max-width: 100%;
-      border-radius: .5rem;
+      border-radius: 12px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    /* Notification Badge */
+    .notification-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #e53e3e;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Notification Item Styling */
+    .notification-item {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 0;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .notification-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .notification-actions .btn {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .notification-status {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .status-pending {
+      background-color: #fef5e7;
+      color: #d69e2e;
+    }
+
+    .status-accepted {
+      background-color: #f0fff4;
+      color: #38a169;
+    }
+
+    .status-declined {
+      background-color: #fff5f5;
+      color: #e53e3e;
     }
   </style>
 </head>
+
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">GalleryLoop</a>
-      <div class="ms-auto d-flex gap-3">
-        <button class="btn btn-sm btn-outline-secondary">Notifications</button>
-        <a href="/logout" class="btn btn-sm btn-primary">Logout</a>
+      <div class="ms-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm position-relative" onclick="showNotifications()">
+          Notifications
+          <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+        </button>
+        <a href="/logout" class="btn btn-primary btn-sm text-white">Logout</a>
       </div>
     </div>
   </nav>
 
-  <!-- Profile -->
+  <!-- Profile Section -->
   <div class="container">
-    <div class="profile-header">
-      <img src="{{ url_for('static', filename=profile.profile_img.split('static/')[-1]) }}" alt="Profile" class="profile-pic">
+    <div class="profile-card text-center">
+      <img src="{{ url_for('static', filename=profile.profile_img) }}" alt="Profile" class="profile-pic" />
       <div class="profile-info">
         <h1>{{ profile.name }}</h1>
         <p>{{ profile.bio }}</p>
       </div>
-      <div class="profile-buttons mt-3 d-flex flex-wrap gap-2 justify-content-center">
-        <button class="btn btn-primary" onclick="openModal()">Edit Profile</button>
-        <button class="btn btn-outline-primary" onclick="Post()">Post</button>
+      <div class="profile-buttons d-flex flex-wrap justify-content-center gap-2">
+        <button class="btn btn-primary text-white" onclick="openEditProfileModal()">Edit Profile</button>
+        <button class="btn btn-outline-primary" onclick="openPostModal()">Post</button>
         <button class="btn btn-outline-primary" onclick="uploadmodel()">Upload</button>
         <button class="btn btn-outline-secondary" onclick="showPastEvents()">Past Events</button>
       </div>
-    </div>
 
-    <!-- Marketplace -->
-    <div class="marketplace" id="marketplace"></div>
+      <div class="marketplace" id="marketplace"></div>
+    </div>
   </div>
 
-  <!-- Image Preview Modal -->
+  <!-- Modals -->
   <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content p-3">
-        <img src="" class="modal-img" id="modalImage" alt="Expanded Image">
+        <img src="" class="modal-img" id="modalImage" alt="Expanded Image" />
       </div>
     </div>
   </div>
 
-  <!-- Edit Profile Modal -->
   <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-4">
         <h5>Edit Profile</h5>
         <form action="/update_profile" method="POST" enctype="multipart/form-data">
-          <input type="text" name="name" placeholder="Enter Name" class="form-control mb-2">
-          <input type="text" name="bio" placeholder="Enter Bio" class="form-control mb-2">
-          <input type="file" name="profile_pic" class="form-control mb-3">
-          <button type="submit" class="btn btn-primary w-100">Update</button>
+          <input type="text" name="name" placeholder="Enter Name" class="form-control mb-2" />
+          <input type="text" name="bio" placeholder="Enter Bio" class="form-control mb-2" />
+          <input type="file" name="profile_pic" class="form-control mb-3" />
+          <button type="submit" class="btn btn-primary w-100 text-white">Update</button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Upload Modal -->
   <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-4">
@@ -141,21 +297,39 @@
             <option value="public">Public</option>
             <option value="private">Private</option>
           </select>
-          <input type="number" name="cost" placeholder="Price" class="form-control mb-2">
+          <input type="number" name="cost" placeholder="Price" class="form-control mb-2" />
           <div id="privateFields" style="display:none;">
-            <input type="email" name="clientEmail" placeholder="Client Email" class="form-control mb-2">
-            <input type="text" name="clientName" placeholder="Client Name" class="form-control mb-2">
-            <input type="tel" name="clientMobile" placeholder="Client Mobile" class="form-control mb-2">
+            <input type="email" name="clientEmail" placeholder="Client Email" class="form-control mb-2" />
+            <input type="text" name="clientName" placeholder="Client Name" class="form-control mb-2" />
+            <input type="tel" name="clientMobile" placeholder="Client Mobile" class="form-control mb-2" />
           </div>
-          <input type="date" name="date" class="form-control mb-2">
-          <input type="file" name="photos" multiple class="form-control mb-3">
-          <button type="submit" class="btn btn-primary w-100">Upload</button>
+          <input type="date" name="date" class="form-control mb-2" />
+          <input type="file" name="photos" multiple class="form-control mb-3" />
+          <button type="submit" class="btn btn-primary w-100 text-white">Upload</button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Past Events Modal -->
+  <div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4">
+        <h5>Create Post</h5>
+        <form id="postForm" action="/post_img" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="caption" class="form-label">Caption</label>
+            <input type="text" name="caption" id="caption" class="form-control" placeholder="Write a caption..." required />
+          </div>
+          <div class="mb-3">
+            <label for="Post_imgs" class="form-label">Upload Images</label>
+            <input type="file" name="Post_imgs" id="Post_imgs" multiple class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100 text-white">Post</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="pastEventsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-4">
@@ -165,68 +339,159 @@
     </div>
   </div>
 
+  <!-- Notifications Modal -->
+  <div class="modal fade" id="notificationsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5>Hiring Requests</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div id="notificationsList">
+          <!-- Notifications will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Expand image in modal
     function expandImage(url) {
       document.getElementById("modalImage").src = url;
       new bootstrap.Modal(document.getElementById("imageModal")).show();
     }
 
-    // Toggle private fields
     function togglePrivateFields() {
       const status = document.getElementById("status").value;
-      document.getElementById("privateFields").style.display = (status === "private") ? "block" : "none";
+      document.getElementById("privateFields").style.display = status === "private" ? "block" : "none";
     }
 
-    // Open modals
-    function openModal() {
-      new bootstrap.Modal(document.getElementById("editModal")).show();
-    }
-    function Post() {
-      new bootstrap.Modal(document.getElementById("editPost")).show();
-    }
-    function uploadmodel() {
-      new bootstrap.Modal(document.getElementById("uploadModal")).show();
-    }
+    function openEditProfileModal() { new bootstrap.Modal(document.getElementById("editModal")).show(); }
+    function uploadmodel() { new bootstrap.Modal(document.getElementById("uploadModal")).show(); }
+    function openPostModal() { new bootstrap.Modal(document.getElementById("postModal")).show(); }
+
     function showPastEvents() {
       const modal = new bootstrap.Modal(document.getElementById("pastEventsModal"));
       modal.show();
-
       fetch('/get-past-events')
         .then(res => res.json())
         .then(data => {
           const eventList = document.getElementById('eventList');
           eventList.innerHTML = "";
-
           if (data.clients?.length) {
             data.clients.forEach(client => {
               eventList.innerHTML += `
-                <div class="border rounded p-2 mb-2">
+                <div class="border rounded p-2 mb-2 bg-light">
                   <strong>Name:</strong> ${client.client_name}<br>
                   <strong>Email:</strong> ${client.client_email}<br>
                   <strong>Mobile:</strong> ${client.client_no}<br>
                   <strong>Date:</strong> ${client.date}
                 </div>`;
             });
+          } else eventList.innerHTML = "<p>No past events found.</p>";
+        })
+        .catch(() => { document.getElementById('eventList').innerHTML = "<p>Error loading events.</p>"; });
+    }
+
+    // Notification Functions
+    function showNotifications() {
+      const modal = new bootstrap.Modal(document.getElementById("notificationsModal"));
+      modal.show();
+      fetchNotifications();
+    }
+
+    function fetchNotifications() {
+      fetch('/get-hiring-requests')
+        .then(res => res.json())
+        .then(data => {
+          const notificationsList = document.getElementById("notificationsList");
+          const notificationBadge = document.getElementById("notificationBadge");
+          
+          if (data.requests && data.requests.length > 0) {
+            // Update badge count
+            const pendingCount = data.requests.filter(req => req.status === 'pending').length;
+            if (pendingCount > 0) {
+              notificationBadge.textContent = pendingCount;
+              notificationBadge.style.display = 'flex';
+            } else {
+              notificationBadge.style.display = 'none';
+            }
+            
+            // Render notifications
+            notificationsList.innerHTML = '';
+            data.requests.forEach(request => {
+              const statusClass = `status-${request.status}`;
+              notificationsList.innerHTML += `
+                <div class="notification-item">
+                  <div class="notification-header">
+                    <div>
+                      <strong>${request.user_email}</strong>
+                      <span class="notification-status ${statusClass} ms-2">${request.status}</span>
+                    </div>
+                    <small class="text-muted">${new Date(request.created_at).toLocaleDateString()}</small>
+                  </div>
+                  <div>
+                    <p class="mb-1"><strong>Event:</strong> ${request.event_type}</p>
+                    <p class="mb-1"><strong>Date:</strong> ${request.event_date}</p>
+                    <p class="mb-1"><strong>Location:</strong> ${request.event_location}</p>
+                    <p class="mb-1"><strong>Budget:</strong> $${request.budget}</p>
+                    ${request.special_requests ? `<p class="mb-1"><strong>Special Requests:</strong> ${request.special_requests}</p>` : ''}
+                    ${request.additional_info ? `<p class="mb-1"><strong>Additional Info:</strong> ${request.additional_info}</p>` : ''}
+                    <p class="mb-1"><strong>Contact:</strong> ${request.contact_info}</p>
+                  </div>
+                  ${request.status === 'pending' ? `
+                  <div class="notification-actions">
+                    <button class="btn btn-success btn-sm" onclick="respondToRequest(${request.id}, 'accepted')">Accept</button>
+                    <button class="btn btn-danger btn-sm" onclick="respondToRequest(${request.id}, 'declined')">Decline</button>
+                  </div>
+                  ` : ''}
+                </div>
+              `;
+            });
           } else {
-            eventList.innerHTML = "<p>No past event found.</p>";
+            notificationsList.innerHTML = '<p class="text-center text-muted">No hiring requests found.</p>';
+            notificationBadge.style.display = 'none';
           }
         })
-        .catch(() => {
-          document.getElementById('eventList').innerHTML = "<p>Error loading events.</p>";
+        .catch(err => {
+          console.error("Error fetching notifications:", err);
+          document.getElementById("notificationsList").innerHTML = '<p class="text-center text-danger">Error loading notifications.</p>';
         });
     }
 
-    // Fetch images
+    function respondToRequest(requestId, response) {
+      fetch('/respond-to-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          request_id: requestId,
+          response: response
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(`Request ${response} successfully!`);
+          fetchNotifications(); // Refresh the notifications list
+        } else {
+          alert('Error responding to request: ' + data.message);
+        }
+      })
+      .catch(err => {
+        console.error("Error responding to request:", err);
+        alert('Error responding to request. Please try again.');
+      });
+    }
+
     async function fetchImages() {
       try {
         const res = await fetch("/get-images-photographer");
         const data = await res.json();
         const marketplace = document.getElementById("marketplace");
         marketplace.innerHTML = "";
-
         data.images.forEach(image => {
           const card = document.createElement("div");
           card.className = "image-card";
@@ -237,7 +502,28 @@
         console.error("Error fetching images:", err);
       }
     }
+    
+    // Initialize
     fetchImages();
+    // Check for new notifications on page load
+    fetchNotifications();
+
+    document.getElementById("postForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      try {
+        const res = await fetch("/post_img", { method: "POST", body: formData });
+        const text = await res.text();
+        if (res.ok) {
+          alert("Post uploaded successfully!");
+          this.reset();
+          bootstrap.Modal.getInstance(document.getElementById("postModal")).hide();
+          fetchImages();
+        } else alert("Error: " + text);
+      } catch (err) {
+        alert("Error uploading post: " + err);
+      }
+    });
   </script>
 </body>
 </html>
